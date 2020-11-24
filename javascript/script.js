@@ -156,8 +156,7 @@ function getProductForm() {
   const pStock = document.getElementById('ProductStock').value;
   const pPrice = document.getElementById('ProductPrice').value;
 
-  // build request body for post
-  // JSON.stringify converts the object to json
+  // build Product object for Insert or Update
   // required for sending to the API
   const productObj = {
     ProductId: pId,
