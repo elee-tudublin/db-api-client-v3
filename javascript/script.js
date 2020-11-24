@@ -57,8 +57,8 @@ function displayProducts(products) {
                 <td>${product.ProductDescription}</td>
                 <td>${product.ProductStock}</td>
                 <td class="price">&euro;${Number(product.ProductPrice).toFixed(2)}</td>
-                <td><button class="btn btn-xs" data-toggle="modal" data-target="#ProductFormDialog" onclick="prepareProductUpdate(${product.ProductId})"><span class="oi oi-pencil"></span></button></td>
-                <td><button class="btn btn-xs" onclick="deleteProduct(${product.ProductId})"><span class="oi oi-trash"></span></button></td>
+                <td><button class="btn btn-xs" data-toggle="modal" data-target="#ProductFormDialog" onclick="prepareProductUpdate(${product.ProductId})"><span class="oi oi-pencil" data-toggle="tooltip" title="Edit Product"></span></button></td>
+                <td><button class="btn btn-xs" onclick="deleteProduct(${product.ProductId})"><span class="oi oi-trash" data-toggle="tooltip" title="Delete Product"></span></button></td>
                 </tr>`;
 
         return row;       
@@ -172,6 +172,11 @@ function getProductForm() {
   return productJson;
 }
 
+// Setup product form
+function productFormSetup(title) {
+  document.getElementById("productFormTitle").innerHTML = title;
+}
+
 // Add a new product - called by form submit
 // get the form data and send request to the API
 async function addProduct() {
@@ -214,7 +219,8 @@ async function addProduct() {
 
     try {
         // Get broduct by id
-        const product = await getDataAsync(`${BASE_URL}product/${id}`);
+        const product = await getDataAsync(`${BASE_URL}/product/${id}`);
+
         // Fill out the form
         document.getElementById('ProductId').value = product.ProductId; // uses a hidden field - see the form
         document.getElementById('CategoryId').value = product.CategoryId;
@@ -222,6 +228,10 @@ async function addProduct() {
         document.getElementById('ProductDescription').value = product.ProductDescription;
         document.getElementById('ProductStock').value = product.ProductStock;
         document.getElementById('ProductPrice').value = product.ProductPrice;
+
+        // Set form Title
+        productFormSetup(`Update Product ID: ${product.ProductId}`);
+
     } // catch and log any errors
     catch (err) {
     console.log(err);
