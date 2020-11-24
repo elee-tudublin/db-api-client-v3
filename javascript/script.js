@@ -24,7 +24,7 @@ async function getDataAsync(url) {
       const json = await response.json();
   
       // Output result to console (for testing purposes) 
-      console.log(json);
+      //console.log(json);
   
       // Call function( passing he json result) to display data in HTML page
       //displayData(json);
@@ -144,7 +144,7 @@ async function updateProductsView(id) {
 }
 
 
-// Get form data and return as json ready for POST
+// Get form data and return as object for POST
 // Uppercase first char to match DB
 function getProductForm() {
 
@@ -159,40 +159,54 @@ function getProductForm() {
   // build request body for post
   // JSON.stringify converts the object to json
   // required for sending to the API
-  const productJson = JSON.stringify({
-  ProductId: pId,
-  CategoryId: catId,
-  ProductName: pName,
-  ProductDescription: pDesc,
-  ProductStock: pStock,
-  ProductPrice: pPrice
-  });
+  const productObj = {
+    ProductId: pId,
+    CategoryId: catId,
+    ProductName: pName,
+    ProductDescription: pDesc,
+    ProductStock: pStock,
+    ProductPrice: pPrice
+  }
 
   // return the body data
-  return productJson;
+  return productObj;
 }
 
 // Setup product form
 function productFormSetup(title) {
+  // reset the form and change the title
+  document.getElementById("productForm").reset();
   document.getElementById("productFormTitle").innerHTML = title;
+
+  // form reset doesn't work for hidden inputs!!
+  // do this to rreset previous id if set
+  document.getElementById("ProductId").value = 0;
 }
 
 // Add a new product - called by form submit
 // get the form data and send request to the API
-async function addProduct() {
+async function addOrUpdateProduct() {
   // url for api call
   const url = `${BASE_URL}/product`
+  let httpMethod = "POST";
+
   // get new product data as json (the request body)
-  const reqBodyJson = getProductForm();
+  const productObj = getProductForm();
+
+  // If ProductId > 0 then this is an existing product for update
+  if (productObj.ProductId > 0) {
+    httpMethod = "PUT";
+  }
   
   // build the request object - note: POST
   // reqBodyJson added to the req body
   const request = {
-      method: 'POST',
+      method: httpMethod,
       headers: HTTP_REQ_HEADERS,
       // credentials: 'include',
       mode: 'cors',
-      body: reqBodyJson
+      // convert JS Object to JSON and add to request body
+      body: JSON.stringify(productObj)
     };
 
   // Try catch 
@@ -221,6 +235,9 @@ async function addProduct() {
         // Get broduct by id
         const product = await getDataAsync(`${BASE_URL}/product/${id}`);
 
+        // Set form defaults
+        productFormSetup(`Update Product ID: ${product.ProductId}`);
+
         // Fill out the form
         document.getElementById('ProductId').value = product.ProductId; // uses a hidden field - see the form
         document.getElementById('CategoryId').value = product.CategoryId;
@@ -228,9 +245,6 @@ async function addProduct() {
         document.getElementById('ProductDescription').value = product.ProductDescription;
         document.getElementById('ProductStock').value = product.ProductStock;
         document.getElementById('ProductPrice').value = product.ProductPrice;
-
-        // Set form Title
-        productFormSetup(`Update Product ID: ${product.ProductId}`);
 
     } // catch and log any errors
     catch (err) {
@@ -265,6 +279,7 @@ async function addProduct() {
             console.log(err);
             return err;
         }
+        
     }
   }
 
