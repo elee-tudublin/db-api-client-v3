@@ -93,16 +93,20 @@ function displayCategories(categories) {
   // first get the select input by its id
   let catSelect = document.getElementById("CategoryId");
 
-  // Add default option (to the currently empty select)
-  // options[catSelect.options.length] is the last option + 1
-  // an option is made from a name, value pair
-  catSelect.options[catSelect.options.length] = new Option('Choose Category', '0');
+  // clear options
+  //while (catSelect.firstChild)
+  //  catSelect.removeChild(catSelect.firstChild);
+
+  // Clear all options except the first (default entry in html)
+  while (catSelect.options.length > 1) {
+    catSelect.removeChild(catSelect.lastChild);
+  }
 
   // Add an option for each category
   // iterate through categories adding each to the end of the options list
   // each option is made from categoryName, categoryId
   for (i=0; i< categories.length; i++) {
-    catSelect.options[catSelect.options.length] = new Option(categories[i].CategoryName, categories[i].CategoryId);
+    catSelect.add(new Option(categories[i].CategoryName, categories[i].CategoryId));
   }
 
 } // end function
@@ -300,8 +304,6 @@ function getProductFormAlt() {
   // return product json
   return JSON.stringify(newProduct);
 }
-
-
 
 // When this script is loaded, call loadProducts() to add products to the page
 loadProducts();
