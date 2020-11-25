@@ -94,17 +94,14 @@ function displayCategories(categories) {
   let catSelect = document.getElementById("CategoryId");
 
   // clear options
-  //while (catSelect.firstChild)
-  //  catSelect.removeChild(catSelect.firstChild);
-
-  // Clear all options except the first (default entry in html)
-  while (catSelect.options.length > 1) {
-    catSelect.removeChild(catSelect.lastChild);
-  }
+  while (catSelect.firstChild)
+    catSelect.removeChild(catSelect.firstChild);
 
   // Add an option for each category
   // iterate through categories adding each to the end of the options list
   // each option is made from categoryName, categoryId
+  // Start with default option
+  catSelect.add(new Option("Choose Category", "0"))
   for (i=0; i< categories.length; i++) {
     catSelect.add(new Option(categories[i].CategoryName, categories[i].CategoryId));
   }
