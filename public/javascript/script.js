@@ -46,26 +46,39 @@ function displayProducts(products) {
     // Each products will be formated as HTML table rowsand added to the array
     // see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map
     // Finally the output array is inserted as the content into the <tbody id="productRows"> element.
-  
-    const rows = products.map(product => {
-      // returns a template string for each product, values are inserted using ${ }
-      // <tr> is a table row and <td> a table division represents a column
-  
-        let row = `<tr>
-                <td>${product.ProductId}</td>
-                <td>${product.ProductName}</td>
-                <td>${product.ProductDescription}</td>
-                <td>${product.ProductStock}</td>
-                <td class="price">&euro;${Number(product.ProductPrice).toFixed(2)}</td>
-                <td><button class="btn btn-xs" data-toggle="modal" data-target="#ProductFormDialog" onclick="prepareProductUpdate(${product.ProductId})"><span class="oi oi-pencil" data-toggle="tooltip" title="Edit Product"></span></button></td>
-                <td><button class="btn btn-xs" onclick="deleteProduct(${product.ProductId})"><span class="oi oi-trash" data-toggle="tooltip" title="Delete Product"></span></button></td>
-                </tr>`;
 
-        return row;       
-    });
-    // Set the innerHTML of the productRows root element = rows
-    // Why use join('') ???
-    document.getElementById('productRows').innerHTML = rows.join('');
+    if (products != null) {
+       const rows = products.map(product => {
+        // returns a template string for each product, values are inserted using ${ }
+        // <tr> is a table row and <td> a table division represents a column
+    
+          let row = `<tr>
+                  <td>${product.ProductId}</td>
+                  <td>${product.ProductName}</td>
+                  <td>${product.ProductDescription}</td>
+                  <td>${product.ProductStock}</td>
+                  <td class="price">&euro;${Number(product.ProductPrice).toFixed(2)}</td>
+                  <td>
+                    <button class="btn btn-xs" data-toggle="modal" data-target="#ProductFormDialog" 
+                    onclick="prepareProductUpdate(${product.ProductId})">
+                    <span class="oi oi-pencil" data-toggle="tooltip" title="Edit Product"></span></button>
+                  </td>
+                  <td>
+                    <button class="btn btn-xs" onclick="deleteProduct(${product.ProductId})">
+                    <span class="oi oi-trash" data-toggle="tooltip" title="Delete Product"></span></button>
+                  </td>
+                  </tr>`;
+
+          return row;       
+      });
+      // Set the innerHTML of the productRows root element = rows
+      // Why use join('') ???
+      document.getElementById('productRows').innerHTML = rows.join('');
+
+    } else {
+      document.getElementById('productRows').innerHTML = `<tr><td>No Products to display</td></tr>`;
+    }
+
 } // end function
 
 
@@ -122,7 +135,8 @@ async function loadProducts() {
     // Get a list of products
     const products = await getDataAsync(`${BASE_URL}/product`);
     // Call displayProducts(), passing the retrieved products list
-    displayProducts(products);
+
+      displayProducts(products);
 
   } // catch and log any errors
       catch (err) {
@@ -136,7 +150,8 @@ async function updateProductsView(id) {
     // call the API enpoint which retrieves products by category (id)
     const products = await getDataAsync(`${BASE_URL}/product/bycat/${id}`);
     // Display the list of products returned by the API
-    displayProducts(products);
+
+      displayProducts(products);
 
   } // catch and log any errors
   catch (err) {
@@ -172,14 +187,14 @@ function getProductForm() {
   return productObj;
 }
 
-// Setup product form
+// Setup product form (for inserting or updating)
 function productFormSetup(title) {
-  // reset the form and change the title
-  document.getElementById("productForm").reset();
+  // Set form title
   document.getElementById("productFormTitle").innerHTML = title;
 
+  // reset the form and change the title
+  document.getElementById("productForm").reset();
   // form reset doesn't work for hidden inputs!!
-  // do this to rreset previous id if set
   document.getElementById("ProductId").value = 0;
 }
 
@@ -197,7 +212,6 @@ async function addOrUpdateProduct() {
   if (productObj.ProductId > 0) {
     httpMethod = "PUT";
   }
-  
   // build the request object - note: POST
   // reqBodyJson added to the req body
   const request = {
@@ -230,15 +244,14 @@ async function addOrUpdateProduct() {
 
   // When a product is selected for update/ editing, get it by id and fill out the form
   async function prepareProductUpdate(id) {
-
     try {
-        // Get broduct by id
+        // 1. Get product by id
         const product = await getDataAsync(`${BASE_URL}/product/${id}`);
 
-        // Set form defaults
+        // 2. Set up the form (title, etc.)
         productFormSetup(`Update Product ID: ${product.ProductId}`);
 
-        // Fill out the form
+        // 3. Fill out the form
         document.getElementById('ProductId').value = product.ProductId; // uses a hidden field - see the form
         document.getElementById('CategoryId').value = product.CategoryId;
         document.getElementById('ProductName').value = product.ProductName;
@@ -252,25 +265,28 @@ async function addOrUpdateProduct() {
     }
   }
 
+
   // Delete product by id using an HTTP DELETE request
   async function deleteProduct(id) {
 
+    // Build the request object
     const request = {
+      // set http method
       method: 'DELETE',
       headers: HTTP_REQ_HEADERS,
       // credentials: 'include',
       mode: 'cors',
     };
-        
+    // Cofirm delete
     if (confirm("Are you sure?")) {
-        // url
+        // build the api url for deleting a product
         const url = `${BASE_URL}/product/${id}`;
-        
         // Try catch 
         try {
+            // call the api and get a result
             const result = await fetch(url, request);
             const response = await result.json();
-
+            // if success (true result), refresh products list
             if (response == true)
               loadProducts();
 
@@ -278,8 +294,7 @@ async function addOrUpdateProduct() {
         } catch (err) {
             console.log(err);
             return err;
-        }
-        
+        } 
     }
   }
 
